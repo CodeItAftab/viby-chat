@@ -15,7 +15,7 @@ const server = http.createServer(app);
 
 app.use(
   cors({
-    origin: "*",
+    origin: "https://viby-chat.vercel.app/",
     // origin: ["http://localhost:5173"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
