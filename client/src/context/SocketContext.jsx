@@ -56,7 +56,7 @@ const SocketProvider = ({ children }) => {
   // }, [userId, socket]);
 
   useEffect(() => {
-    document.title = "Main Layout";
+    document.title = "Viby Chat";
     // if (window.localStorage.getItem("reload")) {
     //   window.localStorage.removeItem("reload");
     //   window.location.reload();
