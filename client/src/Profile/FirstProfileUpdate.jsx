@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 
 import welcome from "../assets/welcome.png";
-import { Pencil } from "lucide-react";
+import { Loader2, Pencil } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { setFirstLogin } from "@/redux/slices/auth";
@@ -14,6 +14,8 @@ function FirstProfileUpdate() {
   const [bio, setBio] = useState("");
   const [avatar, setAvatar] = useState(null);
   const { isLoggedIn, isFirstLogin } = useSelector((state) => state.auth);
+
+  const { isLoading } = useSelector((state) => state.user);
 
   const dispatch = useDispatch();
 
@@ -42,29 +44,29 @@ function FirstProfileUpdate() {
 
   return (
     <div className="h-full w-full flex  items-center justify-center gap-8">
-      <div className="h-[500px] w-5/12 flex items-center justify-center">
+      <div className="h-[500px] w-5/12 hidden lg:flex items-center justify-center">
         <img src={welcome} className="h-full" alt="welcome" />
       </div>
-      <div className="h-full w-5/12 flex flex-col items-center justify-center ">
-        <div className="w-full flex justify-between mb-3">
+      <div className="h-full lg:w-5/12 w-full flex flex-col items-center lg:justify-center lg:pt-0 pt-8">
+        <div className="w-full flex justify-between mb-3 lg:px-0 px-4">
           <div className="h-full flex flex-col">
-            <h1 className="text-3xl font-poppins font-light mb-2 tracking-wide">
+            <h1 className="lg:text-3xl text-xl font-poppins font-light mb-2 lg:tracking-wide">
               Welcome to <strong className="text-blue-500">Viby Chat!</strong>
             </h1>
-            <h3 className="text-muted-foreground">
+            <h3 className="text-muted-foreground lg:text-base text-sm">
               Update Your Account to continue
             </h3>
           </div>
           <Button
             variant="outline"
-            className="w-20 rounded-full border-blue-400"
+            className="w-14 lg:w-20 rounded-full lg:text-base text-sm border-blue-400 lg:leading-normal leading-none"
             onClick={() => dispatch(setFirstLogin(false))}
           >
             Skip
           </Button>
         </div>
         <form
-          className="w-full   py-8 flex flex-col gap-4"
+          className="w-full lg:px-0 px-4 py-8 flex flex-col lg:items-center items-center gap-4"
           onSubmit={handleSubmit}
         >
           <div className="h-44 w-44 relative">
@@ -112,9 +114,11 @@ function FirstProfileUpdate() {
           </div>
           <Button
             type="submit"
+            disabled={isLoading}
             className="w-full my-4 bg-blue-600 hover:bg-blue-700"
           >
-            Update
+            {isLoading && <Loader2 className="animate-spin" />}
+            {isLoading ? "Please wait" : "Update"}
           </Button>
         </form>
       </div>

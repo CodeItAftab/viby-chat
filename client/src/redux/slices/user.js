@@ -9,6 +9,7 @@ const initialState = {
   chats: [],
   // sentRequests: [],
   friends: [],
+  isLoading: false,
 };
 
 export const slice = createSlice({
@@ -96,6 +97,9 @@ export const slice = createSlice({
       state.sentRequests = [];
       state.friends = [];
     },
+    setIsLoading(state, action) {
+      state.isLoading = action.payload;
+    },
   },
 });
 
@@ -110,6 +114,7 @@ export const {
   setFriends,
   resetUserSlice,
   setFriendOnlineStatusInUserSlice,
+  setIsLoading,
 } = slice.actions;
 
 export default slice.reducer;
@@ -206,6 +211,7 @@ export const firstProfileUpdate = createAsyncThunk(
   "auth/firstProfileUpdate",
   async (data, { dispatch }) => {
     try {
+      dispatch(slice.actions.setIsLoading(true));
       const response = await postMultiPartRequest(
         "/user/first_profile_update",
         data
@@ -215,6 +221,8 @@ export const firstProfileUpdate = createAsyncThunk(
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      dispatch(slice.actions.setIsLoading(false));
     }
   }
 );

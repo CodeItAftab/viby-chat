@@ -6,7 +6,7 @@ const { sendEmail } = require("../utils/mailer");
 
 const register = TryCatch(async (req, res, next) => {
   const { name, email, password } = req.body;
-  console.log(name, email, password);
+  // console.log(name, email, password);
 
   const existing_user = await User.findOne({ email }).select("+verified");
   if (existing_user && existing_user.verified) {
@@ -33,7 +33,7 @@ const sendOTP = TryCatch(async (req, res, next) => {
   const hashed_otp = hashSync(otp, 10);
 
   const expiry_time = Date.now() + 10 * 60 * 1000; // 10 minutes
-  console.log(expiry_time);
+  // console.log(expiry_time);
 
   const user = await User.findByIdAndUpdate(
     userId,
@@ -47,7 +47,7 @@ const sendOTP = TryCatch(async (req, res, next) => {
     }
   );
 
-  //   Todo: send otp to email
+  // Send otp to email
 
   const mailOptions = {
     to: user.email,
@@ -56,8 +56,7 @@ const sendOTP = TryCatch(async (req, res, next) => {
     text: `OTP for email verification is ${otp}`,
   };
 
-  const result = await sendEmail(mailOptions);
-  console.log(result);
+  await sendEmail(mailOptions);
 
   res.status(200).json({
     success: true,
@@ -92,8 +91,7 @@ const verifyOTP = TryCatch(async (req, res, next) => {
     text: `Welcome to Viby Chat. Your email has been verified successfully. Enjoy chatting with your friends`,
   };
 
-  const result = await sendEmail(mailOptions);
-  console.log(result);
+  await sendEmail(mailOptions);
 
   return sendToken(res, user._id, 200, "Otp verified successfully");
 });
