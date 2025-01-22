@@ -6,7 +6,7 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-    --primary:#6827ff;
+    --primary: #6827ff;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
@@ -31,6 +31,7 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -63,16 +64,45 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
+
+* {
+  user-select: none;
+}
+
+.message-box {
+  background-image: url('./assets/wallpaper.jpeg');
+}
+
+.messagebox-header {
+  /* box-shadow: 0 2px 2px -4px rgba(0, 0, 0, 0.2); */
+  position: relative;
+  /* border: none; */
+  z-index: 40;
+}
+
+/* .message-send-button {
+  display: none !important;
+} */
 
 
 @media only screen and (max-width: 1024px) {
   .chats-container-hide {
     display: none;
   }
+
+  .navbar {
+    box-shadow: none;
+  }
+
+
+  /* .message-send-button {
+    display: flex !important;
+  } */
 
 
 }

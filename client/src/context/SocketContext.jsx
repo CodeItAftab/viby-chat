@@ -19,13 +19,17 @@ import {
 } from "@/constants/event";
 
 import {
-  FetchAllRequests,
-  FetchAllSentRequests,
-  makeSentRequest,
-  removeRequestFromList,
-  removeSentRequestFromList,
+  // FetchAllRequests,
+  // FetchAllSentRequests,
+  fetchMyProfile,
+  makeNewRequest,
+  makeRequestAccepted,
+  // makeSentRequest,
+  // removeRequestFromList,
+  // removeSentRequestFromList,
   setFriendOnlineStatusInUserSlice,
   unsentRequest,
+  // unsentRequest,
 } from "@/redux/slices/user";
 
 import {
@@ -39,6 +43,11 @@ import {
   setSelectedUserOnlineStatus,
   updateLastMessageForNewMessage,
 } from "@/redux/slices/chat";
+import {
+  addRequest,
+  removeSentRequest,
+  removeRequestFromList,
+} from "@/redux/slices/request";
 
 const SocketContext = createContext();
 
@@ -65,6 +74,7 @@ const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     dispatch(FetchChats());
+    dispatch(fetchMyProfile());
   }, [dispatch]);
 
   useEffect(() => {
@@ -84,44 +94,30 @@ const SocketProvider = ({ children }) => {
       setSocket(null);
     });
 
-    socket?.on(FRIEND_REQUEST_SENT, (data) => {
-      // console.log(data);
-      console.log("Friend Request Sent", data);
-      dispatch(makeSentRequest(data.request));
-    });
+    // socket?.on(FRIEND_REQUEST_SENT, (data) => {
+    //   // console.log(data);
+    //   console.log("Friend Request Sent", data);
+    //   // dispatch(makeSentRequest(data.request));
+    // });
 
-    socket?.on(NEW_FRIEND_REQUEST, () => {
-      dispatch(FetchAllRequests());
-      console.log("New Friend Request");
+    socket?.on(NEW_FRIEND_REQUEST, (data) => {
+      dispatch(addRequest(data.request));
+      dispatch(makeNewRequest(data.request));
     });
 
     socket?.on(FRIEND_REQUEST_CANCELLED, (data) => {
-      // console.log(data);
       dispatch(unsentRequest({ requestId: data.requestId }));
-    });
-
-    socket?.on(REFETCH_FRIEND_REQUESTS, () => {
-      dispatch(FetchAllRequests());
-    });
-
-    socket?.on(REFETCH_SENT_REQUESTS, (data) => {
-      dispatch(FetchAllSentRequests());
-      dispatch(unsentRequest({ requestId: data.requestId }));
+      dispatch(removeRequestFromList({ requestId: data.requestId }));
     });
 
     socket?.on(FRIEND_REQUEST_REJECTED, (data) => {
-      // console.log(data);
-      dispatch(removeRequestFromList({ requestId: data.requestId }));
+      dispatch(removeSentRequest({ requestId: data.requestId }));
+      dispatch(unsentRequest({ requestId: data.requestId }));
     });
 
     socket?.on(FRIEND_REQUEST_ACCEPTED, (data) => {
-      dispatch(removeRequestFromList({ requestId: data.requestId }));
-      dispatch(
-        removeSentRequestFromList({
-          requestId: data.requestId,
-          chatId: data.chatId,
-        })
-      );
+      dispatch(removeSentRequest({ requestId: data.requestId }));
+      dispatch(makeRequestAccepted(data));
     });
 
     socket?.on(NEW_MESSAGE_ALERT, (data) => {

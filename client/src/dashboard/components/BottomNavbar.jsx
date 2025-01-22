@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { IconButton } from "@mui/material";
-import { Chats, Users, MagnifyingGlass, Phone } from "phosphor-react";
+import { Chats, Users, MagnifyingGlass, UserPlus } from "phosphor-react";
 import { useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
 
@@ -58,15 +58,15 @@ function BottomNavbar() {
         </NavLink>
       </li>
       <li className="small-nav-item w-16 h-12  flex items-center justify-center rounded-sm ">
-        <NavLink to={"/calls"}>
+        <NavLink to={"/requests"}>
           {({ isActive }) =>
             isActive ? (
               <IconButton>
-                <Phone size={28} color="#1976d4" weight="fill" />
+                <UserPlus size={28} color="#1976d4" weight="fill" />
               </IconButton>
             ) : (
               <IconButton>
-                <Phone size={28} color="black" />
+                <UserPlus size={28} color="black" />
               </IconButton>
             )
           }

@@ -10,10 +10,24 @@ const schema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Chat",
     },
+    type: {
+      type: String,
+      default: "text",
+      enum: ["text", "media", "file"],
+    },
     content: {
       type: String,
-      required: true,
     },
+    attachments: [
+      {
+        public_id: String,
+        url: String,
+        type: {
+          type: String,
+          enum: ["image", "audio", "video", "file"],
+        },
+      },
+    ],
     state: {
       type: String,
       default: "sent",

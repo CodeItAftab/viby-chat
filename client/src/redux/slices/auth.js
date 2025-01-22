@@ -7,6 +7,8 @@ import { resetChatSlice } from "./chat";
 const initialState = {
   userId: undefined,
   isLoggedIn: false,
+  isFirstLogin: false,
+  isLoading: false,
 };
 
 export const slice = createSlice({
@@ -21,10 +23,16 @@ export const slice = createSlice({
       state.userId = undefined;
       state.isLoggedIn = false;
     },
+    setFirstLogin(state, action) {
+      state.isFirstLogin = action.payload;
+    },
+    setIsLoading(state, action) {
+      state.isLoading = action.payload;
+    },
   },
 });
 
-export const { login, logout } = slice.actions;
+export const { login, logout, setFirstLogin } = slice.actions;
 
 export default slice.reducer;
 
@@ -32,6 +40,7 @@ export const LoginUser = createAsyncThunk(
   "auth/loginUser",
   async (data, { dispatch }) => {
     try {
+      dispatch(slice.actions.setIsLoading(true));
       const response = await postRequest("/auth/login", data);
       if (response.success) {
         console.log(response.userId);
@@ -41,6 +50,8 @@ export const LoginUser = createAsyncThunk(
       console.log(response);
     } catch (err) {
       console.error(err);
+    } finally {
+      dispatch(slice.actions.setIsLoading(false));
     }
   }
 );
@@ -65,8 +76,9 @@ export const LogoutUser = createAsyncThunk(
 
 export const RegisterUser = createAsyncThunk(
   "auth/registerUser",
-  async (data) => {
+  async (data, { dispatch }) => {
     try {
+      dispatch(slice.actions.setIsLoading(true));
       const response = await postRequest("/auth/register", data);
       if (response.success) {
         window.localStorage.setItem("email", data.email);
@@ -74,6 +86,8 @@ export const RegisterUser = createAsyncThunk(
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      dispatch(slice.actions.setIsLoading(false));
     }
   }
 );
@@ -82,13 +96,17 @@ export const VerifyOTP = createAsyncThunk(
   "auth/verifyOTP",
   async (data, { dispatch }) => {
     try {
+      dispatch(slice.actions.setIsLoading(true));
       const response = await postRequest("/auth/verify_otp", data);
       if (response.success) {
+        dispatch(slice.actions.setFirstLogin(true));
         dispatch(slice.actions.login({ userId: response.userId }));
         window.localStorage.removeItem("email");
       }
     } catch (err) {
       console.log(err);
+    } finally {
+      dispatch(slice.actions.setIsLoading(false));
     }
   }
 );

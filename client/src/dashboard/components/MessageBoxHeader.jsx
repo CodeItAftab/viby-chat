@@ -10,8 +10,8 @@ function MessageBoxHeader() {
   const { selectedUser } = useSelector((state) => state.chat);
   const dispatch = useDispatch();
   return (
-    <header className="messagebox-header h-14 w-full  px-3 border-b-[1px] flex justify-between items-center bg-white shrink-0 ">
-      <div className="chat-user-info h-full flex items-center gap-3">
+    <header className=" h-14 w-full  px-3 border-b-[1px] flex justify-between items-center bg-white shrink-0 messagebox-header">
+      <div className="chat-user-info h-full flex items-center gap-3 ">
         <IconButton
           sx={{
             padding: "0",
@@ -23,8 +23,11 @@ function MessageBoxHeader() {
         >
           <CaretLeft color="black" />
         </IconButton>
-        <div className="chat-user-avatar h-9 w-9 rounded-full">
-          <AvatarWithStatus isOnline={selectedUser?.isOnline} />
+        <div className="chat-user-avatar h-9 w-9 ">
+          <AvatarWithStatus
+            url={selectedUser?.avatar}
+            isOnline={selectedUser?.isOnline}
+          />
         </div>
         <div className="header-user-info h-full flex flex-col justify-center gap-1">
           <h3 className="text-base leading-none">

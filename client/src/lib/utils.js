@@ -17,7 +17,7 @@ export function cn(...inputs) {
 //   return resultString;
 // }
 
-// // Example usage
+// Example usage
 // const input =
 //   "Here is a link: https://example.com, an FTP link ftp://example.com, and another one www.test.com. hello.com";
 // console.log(makeLinksUppercase(input));
@@ -41,7 +41,7 @@ export function cn(...inputs) {
 //   return resultString;
 // }
 
-// // Example usage
+// Example usage
 // const input =
 //   "Here is a link: https://example.com, an FTP link ftp://example.com, and another one test.com.";
 // console.log(makeLinksHyperlinks(input));

@@ -2,6 +2,7 @@ const { TryCatch, ErrorHandler } = require("../utils/error");
 const User = require("../models/user");
 const { getNewOtp, compareHashedData, sendToken } = require("../utils/helper");
 const { hashSync } = require("bcrypt");
+const { sendEmail } = require("../utils/mailer");
 
 const register = TryCatch(async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -28,14 +29,13 @@ const sendOTP = TryCatch(async (req, res, next) => {
   const { userId } = req;
   const otp = getNewOtp();
   console.log(otp);
-  //   Todo: send otp to email
 
-  const hashed_otp = await hashSync(otp, 10);
+  const hashed_otp = hashSync(otp, 10);
 
   const expiry_time = Date.now() + 10 * 60 * 1000; // 10 minutes
   console.log(expiry_time);
 
-  await User.findByIdAndUpdate(
+  const user = await User.findByIdAndUpdate(
     userId,
     {
       otp: hashed_otp,
@@ -46,6 +46,18 @@ const sendOTP = TryCatch(async (req, res, next) => {
       validateModifiedOnly: true,
     }
   );
+
+  //   Todo: send otp to email
+
+  const mailOptions = {
+    to: user.email,
+    from: "vibychat@gmail.com",
+    subject: "OTP for email verification",
+    text: `OTP for email verification is ${otp}`,
+  };
+
+  const result = await sendEmail(mailOptions);
+  console.log(result);
 
   res.status(200).json({
     success: true,
@@ -72,6 +84,16 @@ const verifyOTP = TryCatch(async (req, res, next) => {
   user.otp = undefined;
   user.otp_expiry_time = undefined;
   await user.save();
+
+  const mailOptions = {
+    to: user.email,
+    from: "vibychat@gmail.com",
+    subject: "Welcome to Viby Chat",
+    text: `Welcome to Viby Chat. Your email has been verified successfully. Enjoy chatting with your friends`,
+  };
+
+  const result = await sendEmail(mailOptions);
+  console.log(result);
 
   return sendToken(res, user._id, 200, "Otp verified successfully");
 });
@@ -105,4 +127,10 @@ const logout = TryCatch(async (req, res, next) => {
     });
 });
 
-module.exports = { register, sendOTP, verifyOTP, login, logout };
+module.exports = {
+  register,
+  sendOTP,
+  verifyOTP,
+  login,
+  logout,
+};

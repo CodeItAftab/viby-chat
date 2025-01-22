@@ -4,14 +4,7 @@ import AvatarWithStatus from "./AvatarWithStatus";
 import { IconButton } from "@mui/material";
 import { Chat, CheckCircle, XCircle, UserPlus } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-// import { socket } from "@/lib/socket";
-import {
-  ACCEPT_FRIEND_REQUEST,
-  CANCEL_FRIEND_REQUEST,
-  READ_MESSAGE,
-  REJECT_FRIEND_REQUEST,
-  SEND_FRIEND_REQUEST,
-} from "@/constants/event";
+import { READ_MESSAGE } from "@/constants/event";
 
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -23,9 +16,16 @@ import {
 } from "@/redux/slices/chat";
 import { getFromattedTime } from "@/utils/date";
 import { Check } from "lucide-react";
-import { Checks } from "phosphor-react";
+import { Checks, Image } from "phosphor-react";
 import { useNavigate } from "react-router-dom";
 import { useSocket } from "@/hooks/useSocket";
+import {
+  AcceptFriendRequest,
+  CancelFriendRequest,
+  RejectFriendRequest,
+  SendFriendRequest,
+} from "@/redux/slices/request";
+import AvatarWithoutStatus from "./AvatarWithoutStatus";
 
 export function ChatListItem({ chat }) {
   const { selectedChatId } = useSelector((state) => state.chat);
@@ -33,7 +33,9 @@ export function ChatListItem({ chat }) {
 
   return (
     <div
-      className="h-16 w-full bg-white cursor-pointer  flex items-center lg:p-2 px-2 py-0 shrink-0 rounded-lg lg:shadow-sm"
+      // className="h-16 w-full bg-slate-100 cursor-pointer  flex items-center lg:p-2 px-2 py-0 shrink-0 rounded-lg "
+      // className="h-16 w-full bg-white cursor-pointer  flex items-center lg:p-2 px-2 py-0 shrink-0 rounded-lg "
+      className="h-16 w-full bg-white cursor-pointer  flex items-center lg:p-2 px-4 py-0 shrink-0 rounded-lg lg:shadow-sm"
       onClick={async () => {
         if (selectedChatId !== chat?._id) {
           await dispatch(FetchChatMessages(chat?._id));
@@ -49,10 +51,10 @@ export function ChatListItem({ chat }) {
         }
       }}
     >
-      <div className="avatar-container h-10 w-10 rounded-full bg-white">
-        <AvatarWithStatus isOnline={chat?.isOnline} />
+      <div className="avatar-container h-12 w-12 rounded-full  bg-white">
+        <AvatarWithStatus url={chat?.avatar} isOnline={chat?.isOnline} />
       </div>
-      <div className="Chat-user-info h-full flex-grow box-border  pl-3 flex flex-col gap-[6px] justify-center">
+      <div className="Chat-user-info h-full tracking-wide flex-grow box-border  pl-3 flex flex-col gap-[2px] justify-center">
         <h2 className="chat-user-name text-base font-medium leading-none text-slate-700">
           {chat?.name}
         </h2>
@@ -74,19 +76,28 @@ export function ChatListItem({ chat }) {
               )}
             </span>
           )}
-          <p className="last-message text-sm leading-none text-slate-500 text-nowrap ">
-            {/* {faker.lorem.sentence().slice(0, 30) + "..."} */}
 
-            {chat?.lastMessage?.content.length > 30
-              ? chat?.lastMessage?.content.slice(0, 25) + "..."
-              : chat?.lastMessage?.content}
+          <p className="last-message text-sm  text-slate-700 text-nowrap flex gap-1 items-center">
+            {/* {faker.lorem.sentence().slice(0, 30) + "..."} */}
+            {chat?.lastMessage?.type === "image" && (
+              <Image size={18} weight="bold" />
+            )}
+            {!chat?.lastMessage?.content &&
+              chat?.lastMessage?.type === "image" && <span>Image</span>}
+            {!chat?.lastMessage?.content &&
+              chat?.lastMessage?.type === "video" && <span>Video</span>}
+            <span>
+              {chat?.lastMessage?.content?.length > 30
+                ? chat?.lastMessage?.content.slice(0, 25) + "..."
+                : chat?.lastMessage?.content}
+            </span>
           </p>
         </div>
       </div>
-      <div className="chat-time-container h-full w-14 flex flex-col items-center ;g:justify-around lg:gap-0 justify-center gap-2 ">
+      <div className="chat-time-container h-full w-14 flex flex-col items-center lg:justify-around lg:gap-0 justify-center gap-2 ">
         <span
           className={
-            "last-message-time text-[12px] leading-none text-slate-500 font-semibold" +
+            "last-message-time text-[12px] leading-none text-slate-500 font-semibold shrink-0" +
             (chat?.unread ? " text-[#1976d2] " : "")
           }
         >
@@ -100,7 +111,7 @@ export function ChatListItem({ chat }) {
         </span>
         <span
           className={
-            "new-message-count h-5 w-5 flex items-center justify-center text-[12px] bg-[#1976d2] text-white leading-none  rounded-full" +
+            "new-message-count h-[18px] w-[18px] flex items-center justify-center text-[11px] shrink-0 bg-[#1976d2] text-white leading-none  rounded-full" +
             (chat?.unread ? "" : " bg-transparent text-transparent")
           }
         >
@@ -117,16 +128,16 @@ export function FriendListItem({ user }) {
   const { socket } = useSocket();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  console.log(user);
   return (
     <div
-      className="h-16 w-full bg-white cursor-pointer  flex items-center p-2 rounded-lg shadow-sm"
+      className="h-16 w-full bg-white cursor-pointer  flex items-center p-2 rounded-lg lg:shadow-sm"
       onClick={() => {
-        console.log(user);
-        dispatch(setSelectedUserId(user._id));
+        dispatch(setSelectedUserId(user?._id));
         dispatch(
           setSelectedUser({
-            name: user.name,
-            isOnline: user.isOnline,
+            name: user?.name,
+            isOnline: user?.isOnline,
           })
         );
         dispatch(setSelectedChatId(user?.chatId));
@@ -136,6 +147,7 @@ export function FriendListItem({ user }) {
             pushChat({
               _id: user.chatId,
               name: user.name,
+              avatar: user.avatar,
               friendId: user._id,
               isOnline: user.isOnline,
               lastMessage: undefined,
@@ -149,8 +161,8 @@ export function FriendListItem({ user }) {
         navigate("/");
       }}
     >
-      <div className="avatar-container h-10 w-10 rounded-full bg-white">
-        <AvatarWithStatus isOnline={user?.isOnline} />
+      <div className="avatar-container h-10 w-10 rounded-full  bg-white">
+        <AvatarWithStatus url={user?.avatar} isOnline={user?.isOnline} />
       </div>
       <div className="Chat-user-info h-full flex-grow box-border  pl-3 flex flex-col gap-[6px] justify-center">
         <h2 className="chat-user-name text-base font-medium leading-none text-slate-700">
@@ -167,36 +179,33 @@ export function FriendListItem({ user }) {
 }
 
 export function RequestListItem({ user }) {
-  const { socket } = useSocket();
+  const dispatch = useDispatch();
   return (
-    <div className="h-16 w-full bg-white cursor-pointer  flex items-center p-2 rounded-lg shadow-sm">
+    <div className="h-16 w-full bg-white cursor-pointer  flex items-center p-2 rounded-lg lg:shadow-sm">
       <div className="avatar-container h-10 w-10 rounded-full bg-white">
-        <AvatarWithStatus />
+        <AvatarWithoutStatus url={user?.avatar} />
       </div>
       <div className="Chat-user-info h-full flex-grow box-border  pl-2 flex flex-col gap-[6px] justify-center">
         <h2 className="chat-user-name text-sm font-poppins whitespace-nowrap overflow-ellipsis font-medium pr-2 leading-none text-slate-700">
-          {user ? user.name : faker.person.fullName().slice(0, 24) + "..."}
+          {user?.name?.length > 30
+            ? user?.name?.slice(0, 27) + "..."
+            : user?.name}
         </h2>
       </div>
       <div className="chat-time-container h-full w-20 px-3 flex  items-center justify-center gap-1">
         <IconButton
           sx={{ padding: 1 }}
-          onClick={() =>
-            socket?.emit(REJECT_FRIEND_REQUEST, {
-              requestId: user.requestId,
-              senderId: user._id,
-            })
-          }
+          onClick={() => {
+            dispatch(RejectFriendRequest(user?.requestId));
+          }}
         >
           <XCircle size={28} color="red" />
         </IconButton>
         <IconButton
           sx={{ padding: 1 }}
-          onClick={() =>
-            socket?.emit(ACCEPT_FRIEND_REQUEST, {
-              requestId: user.requestId,
-            })
-          }
+          onClick={() => {
+            dispatch(AcceptFriendRequest(user.requestId));
+          }}
         >
           <CheckCircle size={28} color="#1976d4" />
         </IconButton>
@@ -206,11 +215,11 @@ export function RequestListItem({ user }) {
 }
 
 export function SentRequestListItem({ user }) {
-  const { socket } = useSocket();
+  const dispatch = useDispatch();
   return (
-    <div className="h-16 w-full bg-white cursor-pointer  flex items-center p-2 rounded-lg shadow-sm">
+    <div className="h-16 w-full bg-white cursor-pointer  flex items-center p-2 rounded-lg lg:shadow-sm">
       <div className="avatar-container h-10 w-10 rounded-full bg-white">
-        <AvatarWithStatus />
+        <AvatarWithoutStatus url={user?.avatar} />
       </div>
       <div className="Chat-user-info h-full flex-grow box-border  pl-2 flex flex-col gap-[6px] justify-center">
         <h2 className="chat-user-name text-sm font-poppins whitespace-nowrap overflow-ellipsis font-medium pr-2 leading-none text-slate-700">
@@ -220,12 +229,9 @@ export function SentRequestListItem({ user }) {
       <div className="chat-time-container h-full w-20 px-3 flex  items-center justify-center gap-1">
         <Button
           variant="outline"
-          onClick={() =>
-            socket?.emit(CANCEL_FRIEND_REQUEST, {
-              requestId: user.requestId,
-              receiverId: user._id,
-            })
-          }
+          onClick={() => {
+            dispatch(CancelFriendRequest(user.requestId));
+          }}
         >
           Cancel
         </Button>
@@ -235,11 +241,12 @@ export function SentRequestListItem({ user }) {
 }
 
 export function SearchListItem({ user }) {
-  const { socket } = useSocket();
+  console.log(user);
+  const dispatch = useDispatch();
   return (
-    <div className="h-16 w-full bg-white cursor-pointer  flex items-center p-2 rounded-lg shadow-sm">
+    <div className="h-16 w-full bg-white cursor-pointer  flex items-center p-2 rounded-lg lg:shadow-sm">
       <div className="avatar-container h-10 w-10 rounded-full bg-white">
-        <AvatarWithStatus />
+        <AvatarWithoutStatus url={user?.avatar} />
       </div>
       <div className="Chat-user-info h-full flex-grow box-border  pl-2 flex flex-col gap-[6px] justify-center">
         <h2 className="chat-user-name text-base font-poppins whitespace-nowrap overflow-ellipsis font-medium pr-2 leading-none text-slate-700">
@@ -247,9 +254,7 @@ export function SearchListItem({ user }) {
         </h2>
       </div>
       <div className="chat-time-container h-full w-16  flex  items-center justify-center ">
-        <IconButton
-          onClick={() => socket.emit(SEND_FRIEND_REQUEST, { to: user._id })}
-        >
+        <IconButton onClick={() => dispatch(SendFriendRequest(user._id))}>
           <UserPlus size={24} color="#1976d4" />
         </IconButton>
       </div>

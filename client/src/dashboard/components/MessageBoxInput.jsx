@@ -1,19 +1,47 @@
-import { memo, useEffect, useRef, useState } from "react";
+/* eslint-disable react/prop-types */
+import { memo, useEffect, useRef } from "react";
+// import PropTypes from "prop-types";
 import { IconButton } from "@mui/material";
 import { PaperPlaneTilt, Smiley } from "@phosphor-icons/react";
 import { Paperclip } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { sendMessage } from "@/redux/slices/chat";
 
-function MessageBoxInput() {
-  const [message, setMessage] = useState("");
+// proptypes
+
+function MessageBoxInput({ message, setMessage, setAttachments, attachments }) {
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const selectedChatId = useSelector((state) => state.chat.selectedChatId);
   const dispatch = useDispatch();
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(message);
-    dispatch(sendMessage({ content: message }));
+
+    // Check if message has any attahcments
+    if (attachments.length > 0) return;
+
+    const formData = new FormData();
+    formData.append("chatId", selectedChatId);
+    formData.append("content", message.trim());
+
+    if (message.length > 0) {
+      dispatch(sendMessage(formData));
+    }
     setMessage("");
+  };
+
+  const handleFileChange = (e) => {
+    const files = e.target.files;
+    if (!files) {
+      return;
+    }
+
+    if (files.length > 3) {
+      const updatedFiles = Array.from(files).slice(0, 4);
+      setAttachments(updatedFiles);
+    } else {
+      setAttachments(files);
+    }
   };
 
   useEffect(() => {
@@ -22,44 +50,62 @@ function MessageBoxInput() {
 
   return (
     <form
-      className="message-input-container  h-16 w-full   border-t-[1px] flex items-center justify-evenly lg:px-4 z-10 bg-white shrink-0"
+      // className="message-input-container  h-16 w-full pb-3  flex items-center justify-evenly lg:px-4 bg-white shrink-0"
       onSubmit={handleSubmit}
+      className="relative"
     >
-      <div className="message-input h-10 w-[calc(100%-80px)] flex items-center bg-blue-50  rounded-[6px] overflow-hidden border-[2px_solid_black]">
-        <input
-          className="h-10 w-[calc(100%-40px)] px-3 leading-none outline-none rounded-[6px] bg-transparent text-black"
-          type="text"
-          name="message"
-          id="message"
-          maxLength={200}
-          placeholder="Message..."
-          autoComplete="off"
-          ref={inputRef}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-        <IconButton className="emoji-button h-10 w-10">
-          <Smiley size={20} color="black" />
-        </IconButton>
-        <IconButton className="attachment-button h-10 w-10">
-          <Paperclip size={20} color="black" />
+      <div className="message-input-container  h-16 w-full  pb-3  flex items-center justify-evenly lg:px-4 bg-white shrink-0">
+        <div className="message-input pr-2 h-11  w-[calc(100%-80px)]  flex items-center bg-slate-100  rounded-[30px] overflow-hidden border--[1px]">
+          <IconButton className="emoji-button h-10 w-10">
+            <Smiley size={20} color="black" />
+          </IconButton>
+          <IconButton
+            className="attachment-button h-10 w-10"
+            onClick={() => fileInputRef.current.click()}
+          >
+            <Paperclip size={20} color="black" />
+          </IconButton>
+
+          <input
+            type="file"
+            className="hidden"
+            name="attachments"
+            id="attachments"
+            accept="image/* video/*"
+            ref={fileInputRef}
+            multiple
+            onChange={handleFileChange}
+          />
+          <input
+            className="h-11 w-[calc(100%-20px)]  pl-2 py-4 font-light leading-none outline-none rounded-[6px] bg-transparent text-black"
+            type="text"
+            name="message"
+            id="message"
+            maxLength={200}
+            placeholder="Your message..."
+            autoComplete="off"
+            ref={inputRef}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+        </div>
+        <IconButton
+          className="message-send-button "
+          sx={{
+            backgroundColor: "#1976d2",
+            height: "44px",
+            width: "44px",
+            padding: "none",
+            borderRadius: "50%",
+            ":hover": { backgroundColor: "#1976d4" },
+          }}
+          onClick={handleSubmit}
+        >
+          <PaperPlaneTilt size={20} color="white" />
         </IconButton>
       </div>
-      <IconButton
-        className="message-send-button"
-        sx={{
-          backgroundColor: "#9322ff",
-          height: "40px",
-          width: "60px",
-          padding: "none",
-          borderRadius: "10px",
-          ":hover": { backgroundColor: "#1976d4" },
-        }}
-        onClick={handleSubmit}
-      >
-        <PaperPlaneTilt size={20} color="white" />
-      </IconButton>
     </form>
   );
 }
+
 export default memo(MessageBoxInput);

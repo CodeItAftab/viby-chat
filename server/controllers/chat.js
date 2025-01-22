@@ -1,10 +1,11 @@
-const { TryCatch } = require("../utils/error");
+const { TryCatch, ErrorHandler } = require("../utils/error");
 const Chat = require("../models/chat");
 const Message = require("../models/Message");
 const { getOtherMembers } = require("../utils/helper");
 const { users, getIO } = require("../utils/socket");
 const { NEW_MESSAGE_ALERT } = require("../constants/event");
 const { getLinkPreview } = require("link-preview-js");
+const { uploadOnCloudinary } = require("../utils/cloudinary");
 
 const getMessages = TryCatch(async (req, res, next) => {
   const { chatId } = req.params;
@@ -15,6 +16,7 @@ const getMessages = TryCatch(async (req, res, next) => {
   });
   const messages = await Message.find({ chatId })
     .sort({ createdAt: -1 })
+    // .limit(20)
     // .limit(3)
     .lean();
 
@@ -23,10 +25,11 @@ const getMessages = TryCatch(async (req, res, next) => {
     return {
       _id: message._id,
       content: message.content,
+      attachments: message.attachments,
       sender: message.sender,
       chatId: message.chatId,
       state: message.state,
-      type: "text",
+      type: message.type,
       // deliveredList: message.deliveredList,
       // readList: message.readList,
       isSender,
@@ -39,8 +42,13 @@ const getMessages = TryCatch(async (req, res, next) => {
 
 const sendMessage = TryCatch(async (req, res, next) => {
   const { chatId, content } = req.body;
-  if (!content) {
-    throw new ErrorHandler(400, "Message is required");
+  let MessageType = "text";
+  let attachments = [];
+
+  console.log(req.files);
+
+  if (!content && !req?.files?.attachments) {
+    throw new ErrorHandler(400, "Message or attachment is required");
   }
 
   if (!chatId) {
@@ -53,12 +61,15 @@ const sendMessage = TryCatch(async (req, res, next) => {
     throw new ErrorHandler(404, "Chat not found");
   }
 
+  if (req?.files?.attachments) {
+    attachments = await uploadOnCloudinary(req.files.attachments);
+    MessageType = "media";
+  }
+
   const otherMembers = getOtherMembers(chat.members, req.user._id);
-  console.log(users);
   const activeMembers = otherMembers.filter((member) =>
     users.has(member.toString())
   );
-  console.log(activeMembers);
 
   let messageStatus = "sent";
 
@@ -68,6 +79,8 @@ const sendMessage = TryCatch(async (req, res, next) => {
 
   const message = new Message({
     sender: req.user._id,
+    type: MessageType,
+    attachments: attachments?.length > 0 ? attachments : undefined,
     chatId,
     content,
     state: messageStatus,
@@ -79,10 +92,11 @@ const sendMessage = TryCatch(async (req, res, next) => {
   const messageForRealTime = {
     _id: savedMessage._id,
     content: savedMessage.content,
+    attachments: savedMessage.attachments,
     sender: savedMessage.sender,
     chatId: savedMessage.chatId,
     state: savedMessage.state,
-    type: "text",
+    type: savedMessage.type,
     isSender: true,
     createdAt: savedMessage.createdAt,
   };
@@ -143,9 +157,13 @@ const getAllChats = TryCatch(async (req, res, next) => {
           lastMessage: {
             content: message.content,
             createdAt: message.createdAt,
+
             state: message.state,
             isSender: message.sender.toString() === req.user._id.toString(),
-            type: "text",
+            type:
+              message.type === "media"
+                ? message.attachments[0].type
+                : message.type,
           },
           unread: unreadMessageCount,
         };
@@ -163,15 +181,6 @@ const getAllChats = TryCatch(async (req, res, next) => {
     }
   });
 
-  // try {
-  //   const data = await getLinkPreview(
-  //     "https://www.youtube.com/watch?v=MejbOFk7H6c"
-  //   );
-  //   console.log(data);
-  // } catch (err) {
-  //   console.log(err);
-  // }
-
   res.json({
     success: true,
     message: "Chats fetched successfully",
@@ -181,4 +190,16 @@ const getAllChats = TryCatch(async (req, res, next) => {
   // console.log(chats);
 });
 
-module.exports = { sendMessage, getAllChats, getMessages };
+const LinkPreview = async (req, res, next) => {
+  const { url } = req.query;
+  try {
+    const data = await getLinkPreview(url);
+    res.json({ success: true, data });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Invalid URL" });
+    // next(error);
+  }
+};
+
+module.exports = { sendMessage, getAllChats, getMessages, LinkPreview };

@@ -5,8 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { LoginUser } from "@/redux/slices/auth";
+import { Loader2 } from "lucide-react";
 
 const schema = z.object({
   email: z.string().email("Invalid email address"),
@@ -18,8 +19,10 @@ export default function Login() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = form;
+
+  const { isLoading } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
 
@@ -32,7 +35,7 @@ export default function Login() {
   return (
     <div className="w-full lg:grid  lg:grid-cols-5 h-full">
       <div className="flex items-center justify-center lg:py-0 py-10 col-span-3 ">
-        <div className="mx-auto grid w-[420px] gap-8 mb-8">
+        <div className="mx-auto grid lg:w-[420px] w-[360px] px-2 gap-8 mb-8">
           <div className="grid gap-4 text-center mb-4">
             <h1 className="text-3xl font-bold">Login</h1>
 
@@ -93,10 +96,11 @@ export default function Login() {
             </Link>
             <Button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full h-11"
+              disabled={isLoading}
+              className="w-full h-11 flex items-center justify-center gap-2"
             >
-              {isSubmitting ? "Please wait" : "Login"}
+              {isLoading && <Loader2 className="animate-spin" />}
+              {isLoading ? "Please wait" : "Login"}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">

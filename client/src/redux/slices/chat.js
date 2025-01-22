@@ -1,6 +1,6 @@
 import { READ_MESSAGE } from "@/constants/event";
 import { useSocket } from "@/hooks/useSocket";
-import { getRequest, postRequest } from "@/lib/axios";
+import { getRequest, postMultiPartRequest } from "@/lib/axios";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
@@ -13,6 +13,7 @@ const initialState = {
   messages: [],
   unreadMessages: [],
   chats: [],
+  isLoading: false,
 };
 
 const slice = createSlice({
@@ -51,6 +52,9 @@ const slice = createSlice({
     setSelectedUserOnlineStatus: (state, action) => {
       state.selectedUser.isOnline = action.payload;
     },
+    setLoading: (state, action) => {
+      state.isLoading = action.payload;
+    },
     undoSelectedChat: (state) => {
       state.selectedChatId = null;
       state.selectedUserId = null;
@@ -81,6 +85,15 @@ const slice = createSlice({
           return message;
         });
       }
+    },
+
+    readIndividualMessage: (state, action) => {
+      state.messages = state.messages.map((message) => {
+        if (message._id === action.payload.messageId) {
+          message.state = "read";
+        }
+        return message;
+      });
     },
 
     readMessage: (state, action) => {
@@ -168,6 +181,7 @@ export const {
   setSelectedUserId,
   setSelectedUser,
   undoSelectedChat,
+  setLoading,
   setSelectedUserOnlineStatus,
   makeMessagesDelivered,
   readMessage,
@@ -177,6 +191,7 @@ export const {
   updateLastMessage,
   updateLastMessageForNewMessage,
   resetChatSlice,
+  readIndividualMessage,
 } = slice.actions;
 
 export default slice.reducer;
@@ -224,13 +239,13 @@ export const FetchChatMessages = createAsyncThunk(
 
 export const sendMessage = createAsyncThunk(
   "chat/sendMessage",
-  async ({ content }, { dispatch, getState }) => {
+  async (formData, { dispatch, getState }) => {
     try {
       const chatId = getState().chat.selectedChatId;
-      const response = await postRequest("/chat/send-message", {
-        chatId,
-        content,
-      });
+      const response = await postMultiPartRequest(
+        "/chat/send-message",
+        formData
+      );
       if (response.success) {
         dispatch(slice.actions.pushNewMessage(response.message));
         dispatch(

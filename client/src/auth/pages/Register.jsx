@@ -3,13 +3,16 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RegisterUser } from "@/redux/slices/auth";
+import { Loader2 } from "lucide-react";
 
 export default function Register() {
   const [data, setData] = useState({ name: "", email: "", password: "" });
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const { isLoading } = useSelector((state) => state.auth);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +29,7 @@ export default function Register() {
   return (
     <div className="w-full lg:grid  lg:grid-cols-5 h-full">
       <div className="flex items-center justify-center lg:py-0 py-10 col-span-3 ">
-        <div className="mx-auto grid w-[420px] gap-8 mb-12">
+        <div className="mx-auto grid lg:w-[420px] w-[360px] px-2 gap-8 mb-12">
           <div className="grid gap-4 text-center mb-4">
             <h1 className="text-3xl font-bold">Register</h1>
 
@@ -83,8 +86,9 @@ export default function Register() {
               />
             </div>
 
-            <Button type="submit" className="w-full h-11">
-              Register
+            <Button disabled={isLoading} type="submit" className="w-full h-11">
+              {isLoading && <Loader2 className="animate-spin" />}
+              {isLoading ? "Please wait" : "Register"}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">

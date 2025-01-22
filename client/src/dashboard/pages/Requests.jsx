@@ -8,11 +8,12 @@ import {
 } from "../components/ChatListItem";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { FetchAllRequests, FetchAllSentRequests } from "@/redux/slices/user";
+// import { FetchAllRequests, FetchAllSentRequests } from "@/redux/slices/user";
 import SearchInput from "../components/SearchInput";
+import { FetchAllRequests, FetchAllSentRequests } from "@/redux/slices/request";
 
 function Requests() {
-  const { requests, sentRequests } = useSelector((state) => state.user);
+  const { requests, sentRequests } = useSelector((state) => state.request);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -21,10 +22,10 @@ function Requests() {
   }, [dispatch]);
 
   return (
-    <div className="h-full w-full bg-white rounded-lg shadow-sm overflow-hidden flex items-center">
+    <div className="h-full w-full bg-white  shadow-sm overflow-hidden flex items-center">
       <Tabs
         defaultValue="received"
-        className="h-full w-[360px] bg-slate-100 flex flex-col items-center shrink-0"
+        className="h-full w-full  lg:w-[360px] lg:bg-slate-100 flex flex-col items-center shrink-0"
       >
         <header className="w-full p-3 flex items-center justify-between">
           <h1 className="font-poppins text-xl text-slate-600 font-medium">
@@ -44,22 +45,34 @@ function Requests() {
           <TabsContent value="received" className="h-full w-full p-0">
             <ul className="w-full px-4  flex flex-col gap-2 items-center">
               {requests?.map((request) => {
-                const user = { ...request.sender, requestId: request._id };
+                const user = { ...request?.sender, requestId: request?._id };
                 return <RequestListItem key={user._id} user={user} />;
               })}
+
+              {requests.length == 0 && (
+                <span className="text-muted-foreground mt-10 text-sm">
+                  No Request Found
+                </span>
+              )}
             </ul>
           </TabsContent>
           <TabsContent value="sent" className="h-full w-full p-0">
             <ul className="w-full px-4  flex flex-col gap-2 items-center">
               {sentRequests?.map((request) => {
-                const user = { ...request.receiver, requestId: request._id };
+                const user = { ...request?.receiver, requestId: request?._id };
                 return <SentRequestListItem key={user._id} user={user} />;
               })}
+
+              {sentRequests.length == 0 && (
+                <span className="text-muted-foreground mt-10 text-sm">
+                  No Request Found
+                </span>
+              )}
             </ul>
           </TabsContent>
         </ScrollArea>
       </Tabs>
-      <div className="h-full flex-grow flex flex-col items-center justify-center p-4 shrink-0">
+      <div className="h-full flex-grow hidden lg:flex flex-col items-center justify-center p-4 shrink-0">
         <div>
           <img src={img} alt="image" className="h-[400px]" />
         </div>

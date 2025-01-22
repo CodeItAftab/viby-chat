@@ -8,7 +8,9 @@ const { connectDB } = require("./utils/database");
 const routes = require("./routes/index");
 const { initSocket } = require("./utils/socket");
 
-dotenv.config();
+dotenv.config({
+  path: "./.env",
+});
 
 const app = express();
 const server = http.createServer(app);

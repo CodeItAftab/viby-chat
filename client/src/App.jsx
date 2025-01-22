@@ -11,6 +11,7 @@ const Chats = lazy(() => import("./dashboard/pages/Chats"));
 const Friends = lazy(() => import("./dashboard/pages/Friends"));
 const Requests = lazy(() => import("./dashboard/pages/Requests"));
 const Search = lazy(() => import("./dashboard/pages/Search"));
+const FirstProfileUpdate = lazy(() => import("./Profile/FirstProfileUpdate"));
 
 const router = createBrowserRouter(
   [
@@ -121,6 +122,14 @@ const router = createBrowserRouter(
           ),
         },
       ],
+    },
+    {
+      path: "/first-login",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <FirstProfileUpdate />
+        </Suspense>
+      ),
     },
   ],
   {

@@ -21,8 +21,8 @@ function Search() {
   }, [dispatch]);
 
   return (
-    <div className="h-full w-full bg-white rounded-lg shadow-sm overflow-hidden flex items-center">
-      <div className="h-full w-[360px] bg-slate-100 flex flex-col items-center shrink-0">
+    <div className="h-full w-full bg-white shadow-sm overflow-hidden flex items-center">
+      <div className="h-full lg:w-[360px] w-full lg:bg-slate-100 bg:white flex flex-col items-center shrink-0">
         <header className="w-full px-3 py-4 flex items-center justify-between">
           <h1 className="font-poppins text-xl text-slate-600 font-medium">
             Seach People
@@ -43,11 +43,11 @@ function Search() {
           </ul>
         </ScrollArea>
       </div>
-      <div className="h-full flex-grow flex flex-col items-center justify-center p-4 shrink-0">
+      <div className="h-full flex-grow hidden lg:flex flex-col items-center justify-center p-4 shrink-0">
         <div>
           <img src={img} alt="image" className="h-[400px]" />
         </div>
-        <h1 className="text-2xl text-blue-500 font-medium mb-12">
+        <h1 className="text-xl text-blue-500 font-medium mb-12">
           Discover connections, find friends, and explore conversations!
         </h1>
       </div>

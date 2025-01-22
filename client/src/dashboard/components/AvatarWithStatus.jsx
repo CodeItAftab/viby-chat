@@ -3,7 +3,7 @@ import { styled } from "@mui/material/styles";
 import Badge from "@mui/material/Badge";
 import Avatar from "@mui/material/Avatar";
 // import { faker } from "@faker-js/faker";
-function AvatarWithStatus({ isOnline }) {
+function AvatarWithStatus({ isOnline, url }) {
   const StyledBadge = styled(Badge)(({ theme }) => ({
     "& .MuiBadge-badge": {
       backgroundColor: isOnline ? "#44b700" : "orange",
@@ -48,7 +48,7 @@ function AvatarWithStatus({ isOnline }) {
         }}
         alt="Remy Sharp"
         // src={faker.image.avatar()}
-        src="https://avatars.githubusercontent.com/u/97165289"
+        src={url || "https://avatars.githubusercontent.com/u/97165289"}
       />
     </StyledBadge>
   );

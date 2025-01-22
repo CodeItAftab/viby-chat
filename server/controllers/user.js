@@ -4,12 +4,13 @@ const Chat = require("../models/chat");
 const { TryCatch } = require("../utils/error");
 const chat = require("../models/chat");
 const { users } = require("../utils/socket");
+const { uploadAvatarOnCloudinary } = require("../utils/cloudinary");
 
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find(
       { _id: { $ne: req.user._id } },
-      "name "
+      "name avatar"
     ).lean();
 
     const new_users = await Promise.all(
@@ -26,6 +27,7 @@ const getAllUsers = async (req, res) => {
             isSentRequest: false,
             isReceivedRequest: false,
             chatId: chat._id,
+            avatar: user?.avatar?.url,
           };
         }
 
@@ -42,6 +44,7 @@ const getAllUsers = async (req, res) => {
             isSentRequest: true,
             isReceivedRequest: false,
             requestId: request._id,
+            avatar: user?.avatar?.url,
           };
         } else if (
           request?.receiver._id.toString() === req.user._id.toString()
@@ -52,6 +55,7 @@ const getAllUsers = async (req, res) => {
             isSentRequest: false,
             isReceivedRequest: true,
             requestId: request._id,
+            avatar: user?.avatar?.url,
           };
         } else {
           return {
@@ -59,12 +63,11 @@ const getAllUsers = async (req, res) => {
             isFriend: false,
             isSentRequest: false,
             isReceivedRequest: false,
+            avatar: user?.avatar?.url,
           };
         }
       })
     );
-
-    console.log(new_users);
 
     res.status(200).json({ success: true, users: new_users });
   } catch (error) {
@@ -72,27 +75,12 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-const getAllRequests = TryCatch(async (req, res, next) => {
-  const requests = await Request.find({ receiver: req.user._id }, "sender")
-    .populate("sender", "name")
-    .lean();
-  res.status(200).json({ success: true, requests });
-});
-
-const getAllSentRequests = TryCatch(async (req, res, next) => {
-  const requests = await Request.find({ sender: req.user._id }, "receiver")
-    .populate("receiver", "name")
-    .lean();
-  console.log(requests);
-  res.status(200).json({ success: true, requests });
-});
-
 const getAllFriends = TryCatch(async (req, res, next) => {
   const chats = await Chat.find({
     members: req.user._id,
     isGroup: false,
   })
-    .populate("members", "name")
+    .populate("members", "name avatar")
     .lean();
 
   const friends = chats.map((chat) => {
@@ -104,6 +92,7 @@ const getAllFriends = TryCatch(async (req, res, next) => {
       name: friend.name,
       chatId: chat._id,
       isOnline: users.has(friend._id.toString()),
+      avatar: friend?.avatar?.url,
     };
   });
 
@@ -112,13 +101,44 @@ const getAllFriends = TryCatch(async (req, res, next) => {
 
 const getUser = TryCatch(async (req, res, next) => {
   const user = await User.findById(req.params.id).lean();
-  res.status(200).json({ success: true, user });
+
+  res
+    .status(200)
+    .json({ success: true, user: { ...user, avatar: user.avatar.url } });
+});
+
+const firstProfileUpdate = TryCatch(async (req, res, next) => {
+  const bio = req?.body?.bio;
+  const avatar = req?.files?.avatar;
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+  var av = undefined;
+  if (!bio && !avatar) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Please provide bio or avatar" });
+  }
+  if (req?.files?.avatar) {
+    av = await uploadAvatarOnCloudinary(avatar);
+    user.avatar = av;
+  }
+
+  user.bio = bio;
+
+  await user.save();
+  res.json({
+    success: true,
+    message: "Profile updated successfully",
+  });
 });
 
 module.exports = {
   getAllUsers,
-  getAllRequests,
-  getAllSentRequests,
+  // getAllRequests,
+  // getAllSentRequests,
   getAllFriends,
   getUser,
+  firstProfileUpdate,
 };

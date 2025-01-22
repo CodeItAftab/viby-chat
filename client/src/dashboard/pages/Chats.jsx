@@ -4,15 +4,17 @@ import MessageBox from "../components/MessageBox";
 import ChatList from "../components/ChatList";
 import ChatListHeader from "../components/ChatListHeader";
 import SearchInput from "../components/SearchInput";
+// import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+// import abc from "../../assets/animated/abc.lottie";
 
 function Chats() {
   const { selectedChatId } = useSelector((state) => state.chat);
 
   return (
-    <div className="h-full w-full bg-white lg:rounded-lg rounded-none lg:shadow-sm lg:overflow-hidden flex items-center">
+    <div className="h-full w-full bg-white lg:rounded-lg- rounded-none lg:shadow-sm lg:overflow-hidden flex items-center">
       <div
         className={
-          "h-full lg:w-[360px] w-full lg:bg-slate-100 flex flex-col items-center shrink-0" +
+          "h-full lg:w-[360px] w-full lg:bg-blue-50 flex flex-col items-center shrink-0" +
           (selectedChatId ? " chats-container-hide" : "")
         }
       >
@@ -22,11 +24,12 @@ function Chats() {
       </div>
       {selectedChatId && <MessageBox />}
       {!selectedChatId && (
-        <div className="h-full flex-grow lg:flex hidden flex-col items-center justify-center p-4 shrink-0">
+        <div className=" lg:border-l-0 h-full shadow-sm flex-grow lg:flex hidden flex-col items-center justify-center p-4 shrink-0">
           <div>
             <img src={img1} alt="image" className="h-[400px]" />
+            {/* <DotLottieReact src={abc} loop autoplay /> */}
           </div>
-          <h1 className="text-2xl text-blue-500 font-medium mb-12">
+          <h1 className="text-2xl font-poppins text-blue-500 font-light mb-12">
             Select a chat to start new conversation
           </h1>
         </div>

@@ -34,3 +34,19 @@ export const postRequest = async (url, data) => {
     return error.response.data;
   }
 };
+
+export const postMultiPartRequest = async (url, data) => {
+  try {
+    const response = await Axios.post(url, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      withCredentials: true,
+    });
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error.response.data;
+  }
+};

@@ -9,6 +9,7 @@ function AvatarWithoutStatus({ url }) {
         height: "100%",
         width: "100%",
         border: "1px solid rgba(0,0,0,0.2)",
+        objectFit: "cover",
       }}
       alt="Remy Sharp"
       src={url || faker.image.avatar()}
