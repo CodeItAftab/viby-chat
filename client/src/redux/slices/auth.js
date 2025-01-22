@@ -81,6 +81,7 @@ export const RegisterUser = createAsyncThunk(
       dispatch(slice.actions.setIsLoading(true));
       const response = await postRequest("/auth/register", data);
       if (response.success) {
+        console.log(response);
         window.localStorage.setItem("email", data.email);
         return response;
       }
