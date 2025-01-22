@@ -5,10 +5,7 @@ const {
   verifyOTP,
   login,
   logout,
-  firstProfileUpdate,
 } = require("../controllers/auth");
-
-const { isAuthenticated } = require("../middlewares/auth");
 
 const router = express.Router();
 

@@ -17,8 +17,8 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { payload } = await dispatch(RegisterUser(data));
-      if (payload.success) {
+      const { payload } = dispatch(RegisterUser(data));
+      if (payload?.success) {
         navigate("/auth/verify-otp");
       }
     } catch (err) {

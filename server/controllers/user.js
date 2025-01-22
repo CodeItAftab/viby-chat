@@ -100,11 +100,11 @@ const getAllFriends = TryCatch(async (req, res, next) => {
 });
 
 const getUser = TryCatch(async (req, res, next) => {
-  const user = await User.findById(req.params.id).lean();
+  const user = await User.findById(req?.params?.id).lean();
 
   res
     .status(200)
-    .json({ success: true, user: { ...user, avatar: user.avatar.url } });
+    .json({ success: true, user: { ...user, avatar: user?.avatar?.url } });
 });
 
 const firstProfileUpdate = TryCatch(async (req, res, next) => {
