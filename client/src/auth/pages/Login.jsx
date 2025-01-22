@@ -8,6 +8,7 @@ import { z } from "zod";
 import { useDispatch, useSelector } from "react-redux";
 import { LoginUser } from "@/redux/slices/auth";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 const schema = z.object({
   email: z.string().email("Invalid email address"),
@@ -31,6 +32,10 @@ export default function Login() {
     dispatch(LoginUser(data));
     console.log(data);
   };
+
+  useEffect(() => {
+    document.title = "Login | Viby Chat";
+  }, []);
 
   return (
     <div className="w-full lg:grid  lg:grid-cols-5 h-full">
