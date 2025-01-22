@@ -80,11 +80,12 @@ export const RegisterUser = createAsyncThunk(
     try {
       dispatch(slice.actions.setIsLoading(true));
       const response = await postRequest("/auth/register", data);
-      if (response.success) {
-        console.log(response);
-        window.localStorage.setItem("email", data.email);
-        return response;
-      }
+      // if (response.success) {
+      //   console.log(response);
+      //   window.localStorage.setItem("email", data.email);
+      //   return response;
+      // }
+      console.log(response);
     } catch (err) {
       console.error(err);
     } finally {
