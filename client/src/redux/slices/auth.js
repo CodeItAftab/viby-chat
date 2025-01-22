@@ -85,7 +85,7 @@ export const RegisterUser = createAsyncThunk(
       //   window.localStorage.setItem("email", data.email);
       //   return response;
       // }
-      console.log(response);
+      console.log(response.success);
     } catch (err) {
       console.error(err);
     } finally {
