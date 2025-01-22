@@ -195,6 +195,7 @@ function MessageBox() {
                   borderRadius: "50%",
                   ":hover": { backgroundColor: "#1976d4" },
                 }}
+                type="submit"
                 onClick={handleSubmit}
               >
                 <PaperPlaneTilt size={20} color="white" />
