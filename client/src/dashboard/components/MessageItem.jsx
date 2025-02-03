@@ -5,11 +5,11 @@ import { getFromattedDate } from "../../utils/date";
 import { forwardRef, useState } from "react";
 import { Link } from "react-router-dom";
 // import { useEffect, useRef } from "react";
-import { InView } from "react-intersection-observer";
-import { useDispatch, useSelector } from "react-redux";
-import { readIndividualMessage } from "@/redux/slices/chat";
-import { READ_MESSAGE } from "@/constants/event";
-import { useSocket } from "@/hooks/useSocket";
+// import { InView } from "react-intersection-observer";
+import { useSelector } from "react-redux";
+// import { readIndividualMessage } from "@/redux/slices/chat";
+// import { READ_MESSAGE } from "@/constants/event";
+// import { useSocket } from "@/hooks/useSocket";
 
 import {
   Dialog,
@@ -20,11 +20,12 @@ import {
 } from "@/components/ui/dialog";
 import AvatarWithoutStatus from "./AvatarWithoutStatus";
 import { Download } from "lucide-react";
+// import { makeMessageViewdById } from "@/redux/slices/chat";
 
 const MessageItem = forwardRef(function MessageItem({ message }, ref) {
   switch (message?.type) {
     case "text":
-      return <TextMessage message={message} ref={ref} />;
+      return <TextMessage message={message} />;
     case "media":
       return <ImageMessage message={message} />;
     case "date":
@@ -32,30 +33,35 @@ const MessageItem = forwardRef(function MessageItem({ message }, ref) {
   }
 });
 
-const TextMessage = forwardRef(function TextMessage({ message }, ref) {
-  const { socket } = useSocket();
-  const dispatch = useDispatch();
+const TextMessage = ({ message }) => {
+  // const { socket } = useSocket();
+  // const dispatch = useDispatch();
 
   return (
-    <InView
-      as="li"
-      threshold={0.5}
-      onChange={(inView) => {
-        if (inView && !message.isSender && message.state !== "read") {
-          console.log(message?.content);
-          dispatch(readIndividualMessage({ messageId: message._id }));
-          socket?.emit(READ_MESSAGE, {
-            messageId: message._id,
-            chatId: message.chatId,
-          });
-        }
-      }}
-      className={`text-message flex gap-3 h-fit w-fit max-h-[900px] max-w-[95%] shrink-0  ${
+    <li
+      // as="li"
+      // threshold={0.5}
+      // onChange={(inView, entry) => {
+      // if (inView && !message.isSender && message.state !== "read") {
+      // console.log(message?.content, entry);
+
+      // if (entry.isIntersecting) {
+      // dispatch(makeMessageViewdById({ messageId: message._id }));
+      // }
+
+      // dispatch(readIndividualMessage({ messageId: message._id }));
+      // socket?.emit(READ_MESSAGE, {
+      //   messageId: message._id,
+      //   chatId: message.chatId,
+      // });
+      // }
+      // }}
+      className={`text-message flex gap-3 h-fit w-fit max-h-[900px] max-w-[95%] shrink-0   ${
         message?.isSender && "self-end"
       }`}
       id={message?.isFirstUnread ? "first_unread" : ""}
       // ref={message?.isFirstUnread ? unReadRef : null}
-      ref={ref}
+      // ref={ref}
     >
       {/* <li
         className={`text-message flex gap-3 h-fit w-fit max-h-[900px] max-w-[95%] shrink-0  ${
@@ -78,7 +84,7 @@ const TextMessage = forwardRef(function TextMessage({ message }, ref) {
             className={`message   flex justify-center   font-normal text-sm leading-normal tracking-wider break-all  py-1   px-2   min-h-6 max-h-[600px] shadow-sm drop-shadow-sm   w-full lg:max-w-[600px] max-w-[400px] text-wrap   ${
               message?.isSender
                 ? "bg-[#4264ed] text-white rounded--[20px_20px_8px_20px] rounded-md order-2"
-                : "bg-slate-200/60 text-black rounded--[20px_20px_20px_8px] rounded-md"
+                : `bg-slate-200/60  text-black rounded--[20px_20px_20px_8px] rounded-md`
             }`}
           >
             {/* {message} */}
@@ -118,9 +124,9 @@ const TextMessage = forwardRef(function TextMessage({ message }, ref) {
         </div>
       </div>
       {/* </li> */}
-    </InView>
+    </li>
   );
-});
+};
 
 const ImageMessage = ({ message }) => {
   const { selectedUser } = useSelector((state) => state.chat);

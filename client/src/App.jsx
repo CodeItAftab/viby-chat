@@ -1,6 +1,8 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./App.css";
+// import { getToken } from "firebase/messaging";
+// import { messaging } from "./lib/firebase";
 const AuthLayout = lazy(() => import("./auth/AuthLayout"));
 const MainLayout = lazy(() => import("./dashboard/MainLayout"));
 const Login = lazy(() => import("./auth/pages/Login"));
@@ -12,6 +14,13 @@ const Friends = lazy(() => import("./dashboard/pages/Friends"));
 const Requests = lazy(() => import("./dashboard/pages/Requests"));
 const Search = lazy(() => import("./dashboard/pages/Search"));
 const FirstProfileUpdate = lazy(() => import("./Profile/FirstProfileUpdate"));
+
+// import loading from "./lotties/loading_plane.lottie";
+import {
+  BufferingScreen,
+  MainLoadingScreen,
+} from "./components/custom/loading";
+import { Toaster } from "react-hot-toast";
 
 const router = createBrowserRouter(
   [
@@ -60,21 +69,15 @@ const router = createBrowserRouter(
     {
       path: "/",
       element: (
-        <Suspense fallback={<div>Loading...</div>}>
-          <MainLayout />{" "}
+        <Suspense fallback={<MainLoadingScreen />}>
+          <MainLayout />
         </Suspense>
       ),
       children: [
         {
           index: true,
           element: (
-            <Suspense
-              fallback={
-                <div className="h-full w-full flex items-center justify-center">
-                  Loading...
-                </div>
-              }
-            >
+            <Suspense fallback={<BufferingScreen />}>
               <Chats />
             </Suspense>
           ),
@@ -149,6 +152,7 @@ function App() {
   return (
     <div className="App">
       <RouterProvider router={router} />
+      <Toaster />
     </div>
   );
 }

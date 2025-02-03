@@ -5,7 +5,7 @@ import { memo } from "react";
 
 function ChatList() {
   const { chats } = useSelector((state) => state.chat);
-  console.log("ChatList rendered");
+
   const conversations = [...chats];
   return (
     <ScrollArea className="w-full flex-grow lg:py-3">

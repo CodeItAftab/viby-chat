@@ -134,10 +134,37 @@ const firstProfileUpdate = TryCatch(async (req, res, next) => {
   });
 });
 
+const uploadFCMToken = TryCatch(async (req, res, next) => {
+  const { fcmToken } = req.body;
+
+  if (!fcmToken) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Please provide fcmToken" });
+  }
+
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  if (fcmToken === user.fcm_token) {
+    return res
+      .status(400)
+      .json({ success: false, message: "FCM Token already updated" });
+  }
+
+  user.fcm_token = fcmToken;
+  await user.save();
+
+  res.json({ success: true, message: "FCM Token updated successfully" });
+});
+
 module.exports = {
   getAllUsers,
   // getAllRequests,
   // getAllSentRequests,
+  uploadFCMToken,
   getAllFriends,
   getUser,
   firstProfileUpdate,

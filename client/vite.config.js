@@ -4,7 +4,7 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [react()],
-  // assetsInclude: ["**/*.lottie"],
+  assetsInclude: ["**/*.lottie"],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

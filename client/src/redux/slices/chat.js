@@ -1,7 +1,8 @@
 import { READ_MESSAGE } from "@/constants/event";
 import { useSocket } from "@/hooks/useSocket";
-import { getRequest, postMultiPartRequest } from "@/lib/axios";
+import { getRequest, postMultiPartRequest, postRequest } from "@/lib/axios";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import toast from "react-hot-toast";
 
 const initialState = {
   selectedChatId: null,
@@ -9,6 +10,7 @@ const initialState = {
   selectedUser: {
     name: "",
     isOnline: false,
+    // unread: undefined,
   },
   messages: [],
   unreadMessages: [],
@@ -40,6 +42,9 @@ const slice = createSlice({
     },
     setSelectedUser: (state, action) => {
       state.selectedUser = action.payload;
+      // state.selectedUser.unread = state.chats.find(
+      //   (chat) => chat._id === state.selectedChatId
+      // ).unread;
     },
     setFriendOnlineStatus: (state, action) => {
       state.chats = state.chats.map((chat) => {
@@ -61,6 +66,7 @@ const slice = createSlice({
       state.selectedUser = {
         name: "",
         isOnline: false,
+        read: undefined,
       };
       state.messages = [];
     },
@@ -158,6 +164,14 @@ const slice = createSlice({
         return chat;
       });
     },
+    incrementUnreadCount: (state, action) => {
+      state.chats = state.chats.map((chat) => {
+        if (chat._id === action.payload.chatId) {
+          chat.unread += 1;
+        }
+        return chat;
+      });
+    },
     resetChatSlice: (state) => {
       state.selectedChatId = null;
       state.selectedUserId = null;
@@ -169,6 +183,16 @@ const slice = createSlice({
       state.unreadMessages = [];
       state.chats = [];
     },
+    // makeMessageViewdById: (state) => {
+    //   //  read messages of given chatId
+    //   state.messages = state.messages.map((message) => {
+    //     if (message.chatId === state.selectedChatId && !message.isSender && message.state !== "read") {
+    //       message.state = "read";
+    //     }
+    //     return message;
+    //   });
+
+    // },
   },
 });
 
@@ -192,6 +216,7 @@ export const {
   updateLastMessageForNewMessage,
   resetChatSlice,
   readIndividualMessage,
+  makeMessageViewdById,
 } = slice.actions;
 
 export default slice.reducer;
@@ -262,12 +287,21 @@ export const sendMessage = createAsyncThunk(
   }
 );
 
-// export const ReadMessage = createAsyncThunk(
-//   "chat/ReadMessage",
-//   ({ chatId }, { dispatch }) => {
-//     dispatch(slice.actions.readMessage({ chatId }));
-//   }
-// );
+export const ReadMessage = createAsyncThunk(
+  "chat/ReadMessage",
+  async (_, { getState }) => {
+    try {
+      const response = await postRequest(
+        `/chat/read/${getState().chat.selectedChatId}`
+      );
+      if (response.success) {
+        console.log(response.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 
 export const HandleNewMessage = createAsyncThunk(
   "chat/handleNewMessage",
@@ -305,6 +339,26 @@ export const HandleReadEvent = createAsyncThunk(
     console.log("Read Event", chatId);
     if (chatId) {
       socket?.emit(READ_MESSAGE, { chatId });
+    }
+  }
+);
+
+export const CreateGroup = createAsyncThunk(
+  "chat/createGroup",
+  async (data) => {
+    try {
+      setLoading(true);
+      const response = await postMultiPartRequest("/chat/create-group", data);
+      if (response.success) {
+        // dispatch(slice.actions.pushChat(response.chat));
+        console.log(response);
+        return response;
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to create group");
+    } finally {
+      setLoading(false);
     }
   }
 );

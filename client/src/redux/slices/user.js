@@ -1,4 +1,4 @@
-import { getRequest, postMultiPartRequest } from "@/lib/axios";
+import { getRequest, postMultiPartRequest, postRequest } from "@/lib/axios";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { setFirstLogin } from "./auth";
 
@@ -125,7 +125,7 @@ export default slice.reducer;
 //     try {
 //       const response = await postRequest("/request/send", { to: receiverId });
 //       if (response.success) {
-//         console.log(response);
+//
 //       }
 //     } catch (error) {
 //       console.log(error);
@@ -139,7 +139,7 @@ export default slice.reducer;
 //     try {
 //       const response = await postRequest(`/request/cancel/${requestId}`);
 //       if (response.success) {
-//         console.log(response);
+// console.log(response);
 //       }
 //     } catch (error) {
 //       console.log(error);
@@ -152,11 +152,7 @@ export const FetchAllUsers = createAsyncThunk(
   async (_, { dispatch }) => {
     try {
       const response = await getRequest("/user/all/users");
-      if (response.success) {
-        console.log(response);
-        dispatch(slice.actions.setUsers(response.users));
-      }
-      console.log(response);
+      if (response.success) dispatch(slice.actions.setUsers(response.users));
     } catch (error) {
       console.log(error);
     }
@@ -183,7 +179,7 @@ export const FetchAllUsers = createAsyncThunk(
 //     try {
 //       const response = await getRequest("/user/all/sent_requests");
 //       if (response.success) {
-//         console.log(response);
+//
 //         dispatch(slice.actions.setSentRequests(response.requests));
 //       }
 //     } catch (error) {
@@ -197,10 +193,8 @@ export const FetchAllFriends = createAsyncThunk(
   async (_, { dispatch }) => {
     try {
       const response = await getRequest("/user/all/friends");
-      if (response.success) {
-        console.log(response);
+      if (response.success)
         dispatch(slice.actions.setFriends(response.friends));
-      }
     } catch (error) {
       console.log(error);
     }
@@ -236,6 +230,19 @@ export const fetchMyProfile = createAsyncThunk(
       if (response.success) {
         dispatch(slice.actions.setUser(response.user));
       }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const uploadFCMToken = createAsyncThunk(
+  "user/uploadFCMToken",
+  async (token) => {
+    try {
+      await postRequest("/user/upload_fcm_token", {
+        fcmToken: token,
+      });
     } catch (error) {
       console.log(error);
     }

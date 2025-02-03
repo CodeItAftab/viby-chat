@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
-import { connectSocket, disconnectSocket } from "@/lib/socket";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useLayoutEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { connectSocket, disconnectSocket } from "@/lib/socket";
 import {
   FRIEND_CAME_ONLINE,
   FRIEND_READ_MESSAGE,
@@ -19,6 +19,7 @@ import {
 } from "@/constants/event";
 
 import {
+  FetchAllFriends,
   // FetchAllRequests,
   // FetchAllSentRequests,
   fetchMyProfile,
@@ -29,6 +30,7 @@ import {
   // removeSentRequestFromList,
   setFriendOnlineStatusInUserSlice,
   unsentRequest,
+  // uploadFCMToken,
   // unsentRequest,
 } from "@/redux/slices/user";
 
@@ -47,7 +49,11 @@ import {
   addRequest,
   removeSentRequest,
   removeRequestFromList,
+  FetchAllRequests,
+  FetchAllSentRequests,
 } from "@/redux/slices/request";
+// import { getToken } from "firebase/messaging";
+// import { messaging } from "@/lib/firebase";
 
 const SocketContext = createContext();
 
@@ -57,24 +63,35 @@ const SocketProvider = ({ children }) => {
   const { friends } = useSelector((state) => state.user);
   const [socket, setSocket] = useState(null);
   const dispatch = useDispatch();
+
   // useEffect(() => {
-  //   if (!socket && userId) {
-  //     const io = connectSocket(userId);
-  //     setSocket(io);
-  //   }
-  // }, [userId, socket]);
+  //   const requestNotificationPermission = async () => {
+  //     const notificationPersmission = await Notification.requestPermission();
+  //     if (notificationPersmission === "granted") {
+  //       // Generate Token
+  //       const token = await getToken(messaging, {
+  //         vapidKey: import.meta.env.FIREBASE_VAPID_KEY,
+  //       });
+  //       console.log(token);
+  //       dispatch(uploadFCMToken(token));
+  //     } else if (notificationPersmission === "denied") {
+  //       // Show Notification Denied
+  //       console.log("Notification Permission Denied.");
+  //     }
+  //   };
+  //   requestNotificationPermission();
+  // }, [dispatch]);
 
   useEffect(() => {
     document.title = "Viby Chat";
-    // if (window.localStorage.getItem("reload")) {
-    //   window.localStorage.removeItem("reload");
-    //   window.location.reload();
-    // }
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     dispatch(FetchChats());
     dispatch(fetchMyProfile());
+    dispatch(FetchAllFriends());
+    dispatch(FetchAllRequests());
+    dispatch(FetchAllSentRequests());
   }, [dispatch]);
 
   useEffect(() => {
@@ -82,11 +99,7 @@ const SocketProvider = ({ children }) => {
       setSocket(() => connectSocket(userId));
     }
 
-    socket?.on("connect", () => {
-      console.log("Connected to server");
-      // console.log(userId, socket.id);
-      // console.log(socket);
-    });
+    // socket?.on("connect", () => {});
 
     socket?.on("disconnect", () => {
       console.log("Disconnected from server");

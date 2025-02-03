@@ -1,11 +1,12 @@
-import img1 from "../../assets/image1.jpg";
+// import img1 from "../../assets/image1.jpg";
 import { useSelector } from "react-redux";
 import MessageBox from "../components/MessageBox";
 import ChatList from "../components/ChatList";
 import ChatListHeader from "../components/ChatListHeader";
 import SearchInput from "../components/SearchInput";
-// import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-// import abc from "../../assets/animated/abc.lottie";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import sitting from "../../lotties/sitting.lottie";
+import { memo } from "react";
 
 function Chats() {
   const { selectedChatId } = useSelector((state) => state.chat);
@@ -25,9 +26,9 @@ function Chats() {
       {selectedChatId && <MessageBox />}
       {!selectedChatId && (
         <div className=" lg:border-l-0 h-full shadow-sm flex-grow lg:flex hidden flex-col items-center justify-center p-4 shrink-0">
-          <div>
-            <img src={img1} alt="image" className="h-[400px]" />
-            {/* <DotLottieReact src={abc} loop autoplay /> */}
+          <div className=" h-[280px] p-4 flex items-center justify-center">
+            {/* <img src={img1} alt="image" className="h-[400px]" /> */}
+            <DotLottieReact src={sitting} loop autoplay />
           </div>
           <h1 className="text-2xl font-poppins text-blue-500 font-light mb-12">
             Select a chat to start new conversation
@@ -38,4 +39,4 @@ function Chats() {
   );
 }
 
-export default Chats;
+export default memo(Chats);

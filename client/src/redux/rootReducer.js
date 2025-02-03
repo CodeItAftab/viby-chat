@@ -11,8 +11,8 @@ const rootPersistConfig = {
   key: "root",
   storage,
   keyPrefix: "redux-",
-  blacklist: ["app", "chat"],
-  whitelist: ["auth", "user", "request"],
+  blacklist: ["app"],
+  whitelist: ["auth", "user", "request", "chat"],
 };
 
 const rootReducer = combineReducers({

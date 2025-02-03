@@ -6,6 +6,7 @@ const {
   getAllFriends,
   getUser,
   firstProfileUpdate,
+  uploadFCMToken,
 } = require("../controllers/user");
 const { isAuthenticated } = require("../middlewares/auth");
 
@@ -24,5 +25,7 @@ router.get("/all/friends", getAllFriends);
 router.get("/:id", getUser);
 
 router.post("/first_profile_update", firstProfileUpdate);
+
+router.post("/upload_fcm_token", uploadFCMToken);
 
 module.exports = router;

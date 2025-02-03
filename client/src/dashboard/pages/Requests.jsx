@@ -6,20 +6,20 @@ import {
   RequestListItem,
   SentRequestListItem,
 } from "../components/ChatListItem";
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+// import { useEffect } from "react";
+import { useSelector } from "react-redux";
 // import { FetchAllRequests, FetchAllSentRequests } from "@/redux/slices/user";
 import SearchInput from "../components/SearchInput";
-import { FetchAllRequests, FetchAllSentRequests } from "@/redux/slices/request";
+// import { FetchAllRequests, FetchAllSentRequests } from "@/redux/slices/request";
 
 function Requests() {
   const { requests, sentRequests } = useSelector((state) => state.request);
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(FetchAllRequests());
-    dispatch(FetchAllSentRequests());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(FetchAllRequests());
+  //   dispatch(FetchAllSentRequests());
+  // }, [dispatch]);
 
   return (
     <div className="h-full w-full bg-white  shadow-sm overflow-hidden flex items-center">

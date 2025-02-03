@@ -40,13 +40,13 @@ export function ChatListItem({ chat }) {
         if (selectedChatId !== chat?._id) {
           await dispatch(FetchChatMessages(chat?._id));
           await dispatch(setSelectedUserId(chat?.friendId));
+          await dispatch(setSelectedChatId(chat?._id));
           await dispatch(
             setSelectedUser({
               name: chat?.name,
               isOnline: chat?.isOnline,
             })
           );
-          await dispatch(setSelectedChatId(chat?._id));
           // }
         }
       }}
@@ -109,15 +109,17 @@ export function ChatListItem({ chat }) {
           {faker.number.int({ min: 1, max: 12 })} */}
           {/* {new Date(chat?.lastMessage?.time)?.toLocaleTimeString()} */}
         </span>
-        <span
-          className={
-            "new-message-count h-[18px] w-[18px] flex items-center justify-center text-[11px] shrink-0 bg-[#1976d2] text-white leading-none  rounded-full" +
-            (chat?.unread ? "" : " bg-transparent text-transparent")
-          }
-        >
-          {/* {faker.number.int({ min: 0, max: 99 })} */}
-          {chat?.unread > 0 && chat?.unread}
-        </span>
+        {
+          <span
+            className={
+              "new-message-count h-[18px] w-[18px] flex items-center justify-center text-[11px] shrink-0 bg-[#1976d2] text-white leading-none  rounded-full" +
+              (chat?.unread ? "" : " bg-transparent text-transparent")
+            }
+          >
+            {/* {faker.number.int({ min: 0, max: 99 })} */}
+            {chat?.unread > 0 && chat?.unread}
+          </span>
+        }
       </div>
     </div>
   );
@@ -128,19 +130,18 @@ export function FriendListItem({ user }) {
   const { socket } = useSocket();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  console.log(user);
   return (
     <div
       className="h-16 w-full bg-white cursor-pointer  flex items-center p-2 rounded-lg lg:shadow-sm"
       onClick={() => {
         dispatch(setSelectedUserId(user?._id));
+        dispatch(setSelectedChatId(user?.chatId));
         dispatch(
           setSelectedUser({
             name: user?.name,
             isOnline: user?.isOnline,
           })
         );
-        dispatch(setSelectedChatId(user?.chatId));
         const chatIndex = chats.findIndex((chat) => chat?._id === user?.chatId);
         if (chatIndex === -1) {
           dispatch(
@@ -241,7 +242,6 @@ export function SentRequestListItem({ user }) {
 }
 
 export function SearchListItem({ user }) {
-  console.log(user);
   const dispatch = useDispatch();
   return (
     <div className="h-16 w-full bg-white cursor-pointer  flex items-center p-2 rounded-lg lg:shadow-sm">
@@ -257,6 +257,33 @@ export function SearchListItem({ user }) {
         <IconButton onClick={() => dispatch(SendFriendRequest(user._id))}>
           <UserPlus size={24} color="#1976d4" />
         </IconButton>
+      </div>
+    </div>
+  );
+}
+
+export function GroupMemberSelectItem({ user, selected, onSelect }) {
+  return (
+    <div
+      className={`h-16 w-full my-2 bg-white cursor-pointer   flex items-center p-2 rounded-lg  ${
+        selected && "border-[1px] border-[#1976d4]"
+      }`}
+      onClick={() => {
+        onSelect(user._id);
+      }}
+    >
+      <div className="avatar-container h-10 w-10 rounded-full  bg-white">
+        <AvatarWithoutStatus url={user?.avatar} />
+      </div>
+      <div className="Chat-user-info h-full flex-grow box-border  pl-3 flex flex-col gap-[6px] justify-center">
+        <h2 className="chat-user-name text-base font-medium leading-none text-slate-700">
+          {user ? user.name : faker.person.fullName()}
+        </h2>
+      </div>
+      <div className="chat-time-container h-full w-16 flex flex-col items-center justify-center gap-2">
+        <div className="rounded-full h-8 w-8">
+          {selected && <CheckCircle weight="thin" size={32} color="#1976d4" />}
+        </div>
       </div>
     </div>
   );

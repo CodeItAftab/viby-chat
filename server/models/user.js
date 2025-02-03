@@ -41,6 +41,10 @@ const schema = new Schema(
       type: Date,
       select: false,
     },
+    fcm_token: {
+      type: String,
+      select: false,
+    },
   },
   {
     timestamps: true,

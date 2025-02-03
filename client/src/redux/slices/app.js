@@ -4,6 +4,7 @@ const initialState = {
   isLoading: false,
   isError: false,
   errorMessage: "",
+  openCreateGroupModal: false,
 };
 
 export const slice = createSlice({
@@ -17,9 +18,12 @@ export const slice = createSlice({
       state.isError = action.payload.isError;
       state.errorMessage = action.payload.errorMessage;
     },
+    setOpenCreateGroupModal(state, action) {
+      state.openCreateGroupModal = action.payload;
+    },
   },
 });
 
-export const { setLoader, setError } = slice.actions;
+export const { setLoader, setError, setOpenCreateGroupModal } = slice.actions;
 
 export default slice.reducer;

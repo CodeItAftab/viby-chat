@@ -5,7 +5,11 @@ const { getOtherMembers } = require("../utils/helper");
 const { users, getIO } = require("../utils/socket");
 const { NEW_MESSAGE_ALERT } = require("../constants/event");
 const { getLinkPreview } = require("link-preview-js");
-const { uploadOnCloudinary } = require("../utils/cloudinary");
+const {
+  uploadOnCloudinary,
+  uploadAvatarOnCloudinary,
+} = require("../utils/cloudinary");
+// const { default: NotificationService } = require("../utils/notification");
 
 const getMessages = TryCatch(async (req, res, next) => {
   const { chatId } = req.params;
@@ -103,6 +107,14 @@ const sendMessage = TryCatch(async (req, res, next) => {
 
   const io = getIO();
 
+  // console.log(req.user.fcm_token);
+
+  // NotificationService.sendNotification(
+  //   req.user.fcm_token,
+  //   "TEst",
+  //   "<h1>Heading notification</h1>"
+  // );
+
   activeMembers.forEach((member) => {
     const socketId = users.get(member.toString());
     io.to(socketId).emit(NEW_MESSAGE_ALERT, {
@@ -139,6 +151,7 @@ const getAllChats = TryCatch(async (req, res, next) => {
       const otherMember = friend.members.find(
         (member) => member._id.toString() !== req.user._id.toString()
       );
+      console.log(otherMember);
       const unreadMessageCount = await Message.countDocuments({
         chatId: friend._id,
         sender: { $ne: req.user._id },
@@ -202,4 +215,78 @@ const LinkPreview = async (req, res, next) => {
   }
 };
 
-module.exports = { sendMessage, getAllChats, getMessages, LinkPreview };
+const readMessage = TryCatch(async (req, res, next) => {
+  const { chatId } = req.params;
+  const chat = await Chat.findById(chatId);
+  if (!chat) {
+    throw new ErrorHandler(404, "Chat not found");
+  }
+
+  // const messages = await Message.updateMany(
+  //   { chatId, sender: { $ne: req.user._id }, readList: { $ne: req.user._id } },
+  //   { $push: { readList: req.user._id } }
+  // );
+
+  const messages = await Message.find({
+    chatId,
+    sender: { $ne: req.user._id },
+    readList: { $ne: req.user._id },
+  }).lean();
+
+  await Promise.all(
+    messages.map(async (message) => {
+      msg = await Message.findById(message._id);
+      msg.readList.push(req.user._id);
+      // if all members are in read list then change state to read
+      if (chat.members.length - 1 === msg.readList.length) {
+        msg.state = "read";
+      } else if (chat.members.length - 1 == msg.deliveredList.length) {
+        msg.state = "delivered";
+      }
+
+      return await msg.save();
+    })
+  );
+
+  res.json({ success: true, message: "Message read" });
+});
+
+const createGroup = TryCatch(async (req, res, next) => {
+  const { name } = req.body;
+  const members = req.body["members[]"];
+  let groupAvatar;
+  if (!members || members.length < 2) {
+    throw new ErrorHandler(400, "Atleast 2 members are required");
+  }
+
+  if (!name) {
+    throw new ErrorHandler(400, "Group name is required");
+  }
+
+  if (req?.files?.avatar) {
+    groupAvatar = await uploadAvatarOnCloudinary(req.files.avatar);
+  }
+
+  // check if all members are valid and are friends
+
+  const chat = new Chat({
+    members: [...members, req.user._id],
+    isGroup: true,
+    groupAvatar: groupAvatar,
+    admin: req.user._id,
+    groupName: name,
+  });
+
+  const savedChat = await chat.save();
+
+  res.json({ success: true, chat: savedChat });
+});
+
+module.exports = {
+  sendMessage,
+  getAllChats,
+  getMessages,
+  LinkPreview,
+  readMessage,
+  createGroup,
+};

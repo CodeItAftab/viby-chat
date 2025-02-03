@@ -42,7 +42,7 @@ function MessageBox() {
   };
 
   return (
-    <div className="h-full relative lg:flex-grow lg:w-[calc(100%-360px)]  w-full flex flex-col items-center justify-center  shrink-0">
+    <div className="h-full relative  lg:w-[calc(100%-360px)]  w-full flex flex-col items-center justify-center  shrink">
       <div className="h-full w-full flex-col items-center justify-center bg-white lg:shadow-[0px_0px_1px_1px_#0000001b] ">
         <MessageBoxHeader />
         <MessageList />
